@@ -36,23 +36,26 @@ var newCasesArr = [
 ['100', 33323], ['101', 33901], ['102', 35527], ['103', 28391], ['104', 27620], ['105', 25023], ['106', 26922], ['107', 30148], ['108', 31667], ['109', 30833],
 ['110', 32922], ['111', 24601], ['112', 28065], ['113', 37289], ['114', 17588], ['115', 26543], ['116', 21352], ['117', 48529], ['118', 26857], ['119', 22541],
 ['120', 24132], ['121', 27326], ['122', 29917], ['123', 33955], ['124', 29288], ['125', 24972], ['126', 22593], ['127', 23841], ['128', 24128], ['129', 28369],
-['131', 25612], ['132', 20258], ['133', 18117], ['134', 22048]];
-
+['130', 25612], ['131', 20258], ['132', 18117], ['133', 22048], ['134', 20782], ['135', 27143], ['136', 25508], ['137', 24487], ['138', 18873], ['139', 21841],
+['140', 19970], ['141', 23285], ['142', 25434], ['143', 24147], ['144', 21236], ['145', 20568], ['146', 19064], ['147', 18910], ['148', 18721], ['149', 21817],
+['150', 25337]];//doulbe check at some point.
+//return total cases from beginning to 'len'
 function retTotal(len) {
   if (len == "all") {
     return totalCasesArr;//return all of array
   }
   else {
-    return totalCasesArr.slice(len); //only return a part of it.
+    return totalCasesArr.slice(0, len+2); //only return a part of it.
+    //+1 is to include the title.
   }
 }
-
+//return new cases from beginning to 'len'
 function retNew(len) {
   if (len == "all") {
     return newCasesArr;//return all of array
   }
   else {
-    return newCasesArr.slice(len); //only return a part of it.
+    return newCasesArr.slice(0, len+2); //only return a part of it.
   }
 }
 function start() {
@@ -60,9 +63,13 @@ function start() {
   google.charts.setOnLoadCallback(drawTotal);
   google.charts.setOnLoadCallback(drawNew);
 }
-function drawTotal(info) {
+function drawTotal(info) {//info will give a date #.
   if (info == null) {
     var data = google.visualization.arrayToDataTable(retTotal("all"));
+  }
+  else {
+    //var showDates = document.getElementById('showDates').checked;
+    var data = google.visualization.arrayToDataTable(retTotal(info));
   }
   var options = {
     title: 'Total U.S. COVID-19 cases',
@@ -77,6 +84,9 @@ function drawNew(info) {
   if (info == null) {
     var ndata = google.visualization.arrayToDataTable(retNew("all"));
   }
+  else {
+    var ndata = google.visualization.arrayToDataTable(retNew(info));
+  }
   var noptions = {
    title: 'New U.S. COVID-19 cases',
    curveType: 'function',
@@ -85,26 +95,13 @@ function drawNew(info) {
   var nchart = new google.visualization.LineChart(document.getElementById('new_cases'));
   nchart.draw(ndata, noptions);
 }
-function datesClick() {
-  if (document.getElementById('datesClick').checked) {
-  }
-  else {//it has been unchecked
-    var data;
-    if (document.getelementById('date').value != null) {
 
-    }
-    else {
-      drawTotal(retTotal('all'));//if userhasn't entered alternate date, show all of it.
-      drawNew(retNew('all'));
-    }
-  }
-}
 //ex '01/13/2020'
 function dateArrFromStr(dateStr) {
   var arr = [];
-  arr.push(parseInt(dateStr.split(0,2), 10));
-  arr.push(parseInt(dateStr.split(3,5), 10));
-  arr.push(parseInt(dateStr.split(6,10), 10));
+  arr.push(parseInt(dateStr.slice(0,2), 10));
+  arr.push(parseInt(dateStr.slice(3,5), 10));
+  arr.push(parseInt(dateStr.slice(6,10), 10));
   return arr;
 }
 function days_since_start (month, date, year) {//all ints 1-12, 1-31, 2019->
@@ -121,8 +118,8 @@ function days_since_start (month, date, year) {//all ints 1-12, 1-31, 2019->
     }
     days+=date;//add date in current month, which is days into current month
   }
-  if (year <= 2019 && month != 12 && day != 31) {
-    return "Invalid"
+  if (year <= 2019 && month != 12 && date != 31) {
+    return "Invalid";
   }
   //if year > 2020
   return days;
@@ -160,11 +157,33 @@ function findDate (daysSinceStart) {
 function showDates (daySince) {//0 at december 31, 134 for May 13.
   var arr = [['Days Since December 31, 2020', 'Total Cases']];
   var narr = [['Days Since December 31, 2020', 'NewCases']]
-  for (let i=1; i<daySince+1; i++) {
+  for (let i=1; i<daySince; i++) {//+1 or not
     arr.push([findDate(totalCasesArr[i][0]), totalCasesArr[i][1]]);
-    narr.push([findDate(newCasesArr[i][0]), newCasesArr[i][1]])
+    narr.push([findDate(newCasesArr[i][0]), newCasesArr[i][1]]);
   }
   return [arr, narr];
+}
+
+function makeArr() {
+  var data = showDates(150);
+  var total = data[0];
+  var fs = require('fs');
+  var content = "var totalCasesArr = [ ['Days Since December 31, 2020', 'total Cases'],";
+  //for (let i=1; i<totalCasesArr.length; i++) {
+    content = content+"\n" +total[0].toString();
+  //}
+  document.getElementById('arr').innerHTML = content;
+}
+//makeArr();
+//function that executes when submit button is pressed.
+//uses other functions to convert date to 'days since start' & uses that to graph new date.
+function onSubmit() {
+  //makeArr();
+  var date = document.getElementById('date').value;
+  date = dateArrFromStr(date);//convert string to date array.
+  var daySince = days_since_start(date[0], date[1], date[2]);
+  drawTotal(daySince);
+  drawNew(daySince);
 }
 
 /*

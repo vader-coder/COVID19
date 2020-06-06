@@ -5,10 +5,16 @@
   </head>
   <body onload="start()">
     <div id="choices" display="inline-block">
-      <input type="checkbox" id="showDates" onclick="datesClick()"></input>
-      <label for="showDates">Show Dates on Chart</label>
+      <!--<input type="checkbox" id="showDates" onclick="datesClick()"></input>
+      <label for="showDates">Show Dates on Chart</label><br>-->
+      Enter end date in month/day/year format.
+      <input type="text" id="date" value="05/13/2020"></input>
+      <!--<input type="text" id="day"></input>
+      <input type="text" id="year" value="2020"></input>-->
+      <input type="submit" id="submit" onclick="onSubmit()"></input>
     </div>
     <div id="total_cases" style="width: 900px; height: 500px" align="left" display="inline-block"></div>
     <div id="new_cases" style="width: 900px; height: 500px" align="left" display="inline-block"></div>
+    <div id="arr"><div>
   </body>
 </html>
